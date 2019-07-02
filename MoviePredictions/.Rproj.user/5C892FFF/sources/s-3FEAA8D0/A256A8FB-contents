@@ -1,0 +1,115 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+ 
+
+```{r}
+require(tidyverse)
+df <- read_csv("tmdb-box-office-prediction/train.csv")
+
+summary(df)
+
+```
+
+
+```{r}
+glimpse(df)
+```
+
+
+## Goal
+
+predict revenue of films
+
+## Considerations
+
+runtime, release date, languages, OG language, budget
+
+```{r}
+
+# increased budget - increased revenue
+with(df,plot(budget,revenue))
+
+
+#interesting relationship between runtime and revenue
+with(df,plot(runtime,revenue))
+
+```
+
+
+```{r}
+require(stringi)
+require(lubridate)
+
+genre_matching = "Comedy|Horror|Attion|DramaDoocumentary|Science Fiction|Crime|Fantasy|Thriller|Animation|Adventure|Mystery|War|Romance|Music|Family|Western|History|TV Movie|Foreign"
+df <- df%>%mutate(mainGenre = str_extract(genres,genre_matching),
+                  PartOfCollection=stri_extract(belongs_to_collection, regex = "(?<=name\\'\\:\\s\\').+(?=\\'\\,\\s\\'poster)"),
+                                                                              
+                  collectionTF = case_when(is.na(PartOfCollection)==TRUE~'No Collection',
+                                           T~'Collection'),
+                  castSize = str_count(cast, 'name'),
+                  castFemale = str_count(cast, 'gender\'\\:\\s1'),
+                  castMale = str_count(cast, 'gender\'\\:\\s2'),
+                  crewSize = str_count(crew, 'name'),
+                  crewFemale = str_count(crew, 'gender\'\\:\\s1'),
+                  crewMale = str_count(crew, 'gender\'\\:\\s2'),
+                  percentFemale = castFemale/castSize,
+                  #directorGender = str_count(crew, 'Direction\\,\\gender\'\\:\\s2')
+                  countGenres = str_count(genres,'name'),
+                  prodCompCount = str_count(production_companies,'name'),
+                  prodCountriesCount = str_count(production_countries,'name'), 
+                  release_date2 = as_date(release_date,format='%m/%d/%y',tz="UTC"),
+                  release_year = year(release_date2),
+                  release_month = month(release_date2)
+                  )
+
+df%>%group_by(mainGenre)%>%summarise(count=n(),gross=round(mean(revenue,na.rm=T),0))%>%
+  ggplot(aes(x=mainGenre,y=count,fill=gross))+
+  geom_bar(stat='Identity')+coord_flip()
+
+df%>%#filter(collectionTF == 'Collection')%>%
+  group_by(collectionTF)%>%summarise(gross = mean(revenue),count=n())%>%
+  ggplot(aes(x=collectionTF,y=gross,fill=count))+
+  geom_bar(stat='Identity')
+
+
+with(df,plot(percentFemale,revenue))
+
+```
+
+
+
+
+```{r}
+
+
+
+fit <- glm(revenue~budget+castSize+release_year,data=df)
+  
+summary(fit)  
+plot(fit)
+
+```
+
+```{r}
+require(party)
+
+
+fitTree <- ctree() 
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+A

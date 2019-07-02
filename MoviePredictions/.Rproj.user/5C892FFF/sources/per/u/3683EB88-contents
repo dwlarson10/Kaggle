@@ -1,0 +1,57 @@
+
+require(tidyverse)
+
+df <- read_csv("purchases.txt")
+
+
+View(df)
+
+summary(df)
+
+str(df)
+
+prod_id <- df%>%
+  group_by(product_id,customer_id)%>%
+  summarise(count=n(),avg_cost=mean(price))
+
+
+pair_df <- df%>%left_join(df,by='purchase_id',suffix=c("_first","_second"))%>%filter(product_id_first != product_id_second)
+
+
+
+agg_pair_df <- pair_df%>%
+  group_by(product_id_first,product_id_second)%>%
+  summarise(count=n())%>%
+  arrange(product_id_first,desc(count))
+
+
+
+prodoct_function <- function(df_input,prod_id,n) {
+    df_input%>%
+    left_join(df,by='purchase_id',suffix=c("_first","_second"))%>%
+    filter(product_id_first != product_id_second)%>%
+     group_by(product_id_first,product_id_second)%>%
+    summarise(count=n())%>%
+    arrange(product_id_first,desc(count))%>%
+      filter(product_id_first == prod_id)%>%head(n)
+  
+}
+
+
+
+prodoct_function(df,'BM7773',5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

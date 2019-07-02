@@ -1,0 +1,170 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## Background
+Goal of this project is to get some more experience with modeling by completing in one of the many evergreen kaggle competitions. This data set is the Box Office Preditions data set. The goal is to predict the revenue of movies in the test data set. 
+
+# Data cleaning and wrangling
+
+The initial step of this data set is to clean the data set. There are several nested json strings within the dataframe columns that we will need to use regualer expressions to extract. In addition to data cleaning we will do some visualizations to identify some of the key variables that we should use for our models. 
+ 
+ 
+
+```{r load data}
+require(tidyverse)
+dfTrain <- read_csv("tmdb-box-office-prediction/train.csv")
+dfTrain$set <- "Train"
+
+dftest <- read_csv("tmdb-box-office-prediction/test.csv")
+dftest$revenue <- " "
+dftest$set <- "test"
+
+
+df <- rbind(dfTrain,dftest)
+
+glimpse(df)
+
+```
+
+## Cleaning the data for analysis
+
+Looking closely at the data we can see that a number of the fields are json strings. The first step will be to extract some meaningful data from the stings using regualar expressions (REGEX). 
+
+Columns to work with
+
+- genre
+- belongs to collection
+- production companies
+- production countries
+- spoken languages
+- keywords
+- cast
+- crew
+
+```{r Data cleaning}
+require(stringi)
+require(lubridate)
+
+genre_matching = "Comedy|Horror|Attion|DramaDoocumentary|Science Fiction|Crime|Fantasy|Thriller|Animation|Adventure|Mystery|War|Romance|Music|Family|Western|History|TV Movie|Foreign"
+df <- df%>%mutate(revenue = as.numeric(revenue),mainGenre = str_extract(genres,genre_matching),
+                  PartOfCollection=stri_extract(belongs_to_collection, regex = "(?<=name\\'\\:\\s\\').+(?=\\'\\,\\s\\'poster)"),
+                                                                              
+                  collectionTF = case_when(is.na(PartOfCollection)==TRUE~1,
+                                           T~0),
+                  castSize = str_count(cast, 'name'),
+                  castFemale = str_count(cast, 'gender\'\\:\\s1'),
+                  castMale = str_count(cast, 'gender\'\\:\\s2'),
+                  crewSize = str_count(crew, 'name'),
+                  crewFemale = str_count(crew, 'gender\'\\:\\s1'),
+                  crewMale = str_count(crew, 'gender\'\\:\\s2'),
+                  percentFemale = castFemale/castSize,
+                  #directorGender = str_count(crew, 'Direction\\,\\gender\'\\:\\s2')
+                  countGenres = str_count(genres,'name'),
+                  prodCompCount = str_count(production_companies,'name'),
+                  prodCountriesCount = str_count(production_countries,'name'), 
+                  languagesSpoken = str_count(spoken_languages,'name'),
+                  english = str_detect(spoken_languages,'English'),
+                  release_date2 = as_date(release_date,format='%m/%d/%y',tz="UTC"),
+                  release_year = year(release_date2),
+                  release_month = month(release_date2)
+                  )
+
+
+dftest = df%>%filter(set=='test')%>%
+  select('revenue','budget',
+         'popularity',
+         'runtime',
+         #'mainGenre',
+         'collectionTF',
+         'castSize',
+         'castFemale',
+         'castMale',
+         'percentFemale',
+         'countGenres',
+         'prodCompCount',
+         'prodCountriesCount',
+         'languagesSpoken',
+         'release_year',
+         'release_month')
+dfTrain = df%>%filter(set=='Train')%>%
+  select('revenue','budget',
+         'popularity',
+         'runtime',
+         #'mainGenre',
+         'collectionTF',
+         'castSize',
+         'castFemale',
+         'castMale',
+         'percentFemale',
+         'countGenres',
+         'prodCompCount',
+         'prodCountriesCount',
+         'languagesSpoken',
+         'release_year',
+         'release_month')%>%filter(complete.cases(.))
+
+
+summary(dfTrain)
+
+```
+
+## Exploratory Analysis
+
+
+
+
+
+```{r}
+
+
+
+fit <- glm(revenue~budget+castSize+release_year,data=df)
+  
+summary(fit)  
+plot(fit)
+
+```
+
+```{r}
+require(randomForest)
+
+
+rf<- randomForest(revenue~.,data=dfTrain,ntree = 501,
+                         replace = TRUE,
+                         nodesize = 9,
+                         importance = TRUE)
+
+rf
+
+
+
+```
+
+
+```{r}
+require(plotly)
+importance <- importance(rf) 
+
+# Create data frame using importance. 
+varImportance <- data.frame(Variables = row.names(importance), 
+                            Importance = round(importance[,'IncNodePurity'], 0))
+
+# Create interactive plot.  
+ggplotly(ggplot(varImportance, aes(x = reorder(Variables, Importance), 
+                           y = Importance)) +
+       geom_bar(stat='identity') + 
+       labs(title = 'Importance of predictors', x = 'Predictors', y = 'rmsle') +
+       coord_flip() + 
+       theme_light())
+
+
+
+```
+
+
+
+
+
+

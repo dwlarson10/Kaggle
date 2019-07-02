@@ -1,0 +1,1 @@
+"0","train%>%group_by(Parch)%>%summarise(Surv_rate = mean(Survived))%>%ggplot(aes(x=Parch,y=Surv_rate))+geom_bar(stat = 'identity')"

@@ -1,0 +1,43 @@
+"0","```r
+require(RODBC)
+source(\"Confusion.R\")
+dbhandle <- odbcDriverConnect('Driver={SQL Server Native Client 11.0};Server=agstrat.drexel.edu,50009;Database=irae_prod;trusted_connection=yes;')
+df <- sqlQuery(dbhandle, \" 
+SELECT *
+FROM irae.Retention AS r
+INNER JOIN irae.adm AS a ON a.PIDM = r.PIDM AND r.EnteringTerm = a.TERM AND a.LevelCode = r.EnteringLevelCode
+LEFT JOIN Irae_Prod.irae.FinAid AS fin ON fin.PIDM = r.PIDM AND fin.AcYr = r.EnteringAcYr   
+    LEFT JOIN
+    (
+        SELECT fst.PersonalIdentifier,
+               LEFT(fst.StudentTermCode, 5) AS term5a,
+               fst.GPATerm,
+               fst.CreditsEarnedTerm,
+               fst.CreditsAttemptedTerm,
+               1.0 * CreditsEarnedTerm / CreditsAttemptedTerm AS CreditPerc
+        FROM IBNSA.Final.FactStudentTerm AS fst
+        WHERE fst.VersionKey = 1
+              AND fst.StudentTermCode >= 201215 --in ('201735','201635','201535','201435','201335','201235')
+              AND fst.CreditsAttemptedTerm > 0
+    ) AS gpa
+        ON r.PIDM = gpa.PersonalIdentifier
+           AND gpa.term5a = r.Term5
+    LEFT JOIN
+    (
+        SELECT PIDM,
+               EnrolledInDrexel,
+               EnrolledOrGradDrexel,
+               EnteringTerm
+        FROM irae.retention
+        WHERE seq = 5
+              AND UGFTFT_EnteringCohort = 1
+    ) AS fallRet
+        ON fallRet.PIDM = r.PIDM
+           AND fallRet.EnteringTerm = r.EnteringTerm
+WHERE r.UGFTFT_EnteringCohort = 1
+      AND r.EnteringAcYr IN ( '20162017', '20172018', '20152016', '20142015', '20132014', '20122013','20182019' )
+      AND r.Seq IN ( 2);
+               
+               \" )
+close(dbhandle)
+```"

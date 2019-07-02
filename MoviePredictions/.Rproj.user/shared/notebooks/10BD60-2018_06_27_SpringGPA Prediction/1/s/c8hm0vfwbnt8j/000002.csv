@@ -1,0 +1,10 @@
+"0","```r
+require(caret)
+pred = predict(fit, newdata=test,type = \"response\")
+test$pred <- pred
+test$pred2 = ifelse(pred > 0.80,1,0)
+draw_confusion_matrix(confusionMatrix(factor(test$pred2),factor(test$EnrolledOrGradDrexel.1)))
+```"
+"1","Error in confusionMatrix.default(factor(test$pred2), factor(test$EnrolledOrGradDrexel.1)) : 
+  the data cannot have more levels than the reference
+"

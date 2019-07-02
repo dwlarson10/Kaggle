@@ -1,0 +1,1 @@
+"0","train%>%mutate(left_Cabin = substr(Cabin,1,1))%>%group_by(left_Cabin)%>%summarise(Surv_rate = mean(Survived))%>%ggplot(aes(x=left_Cabin,y=Surv_rate))+geom_bar(stat = 'identity')"

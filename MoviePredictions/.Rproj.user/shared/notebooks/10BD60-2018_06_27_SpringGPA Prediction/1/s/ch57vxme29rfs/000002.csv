@@ -1,0 +1,130 @@
+"0","```r
+require(pscl)
+options(scipen = 999)
+fit <- glm(EnrolledOrGradDrexel.1 ~ 
+             SATAnalysis1600 + 
+             GPATerm +  
+            CreditPerc +
+             HighSchoolGPA +
+             TotalBudget + IraeEFC+
+             EA+
+             A + 
+             AS + 
+             B + 
+             C + 
+             CI + 
+             GC + 
+             NH + 
+             PH+
+             R  +
+             #SM +
+             T,
+                              family = binomial(link = 'logit'),
+                              data = train)
+print(fit)
+```"
+"1","
+Call:  glm(formula = EnrolledOrGradDrexel.1 ~ SATAnalysis1600 + GPATerm + 
+    CreditPerc + HighSchoolGPA + TotalBudget + IraeEFC + EA + 
+    A + AS + B + C + CI + GC + NH + PH + R + T, family = binomial(link = \"logit\"), 
+    data = train)
+
+Coefficients:
+    (Intercept)  SATAnalysis1600          GPATerm       CreditPerc    HighSchoolGPA  
+   -2.113547863      0.000613023      0.885773224      2.565288913      0.117284526  
+    TotalBudget          IraeEFC               EA                A               AS  
+   -0.000019691      0.000000929      0.082356637     -0.486641750     -0.380888956  
+              B                C               CI               GC               NH  
+   -0.163924632     -0.769660571      0.071867654     -0.568490183     -0.455176516  
+             PH                R                T  
+   -0.097160191      0.286041525     11.633871185  
+
+Degrees of Freedom: 3170 Total (i.e. Null);  3153 Residual
+Null Deviance:	    1856 
+Residual Deviance: 1491 	AIC: 1527
+"
+"0","```r
+summary(fit)
+```"
+"1","
+Call:
+glm(formula = EnrolledOrGradDrexel.1 ~ SATAnalysis1600 + GPATerm + 
+    CreditPerc + HighSchoolGPA + TotalBudget + IraeEFC + EA + 
+    A + AS + B + C + CI + GC + NH + PH + R + T, family = binomial(link = \"logit\"), 
+    data = train)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-2.9388   0.2311   0.2973   0.3860   2.5338  
+
+Coefficients:
+                      Estimate     Std. Error z value          Pr(>|z|)    
+(Intercept)      -2.1135478632   2.2717987393  -0.930            0.3522    
+SATAnalysis1600   0.0006130229   0.0006248019   0.981            0.3265    
+GPATerm           0.8857732236   0.1207108433   7.338 0.000000000000217 ***
+CreditPerc        2.5652889131   0.4429329691   5.792 0.000000006972059 ***
+HighSchoolGPA     0.1172845264   0.1728810262   0.678            0.4975    
+TotalBudget      -0.0000196913   0.0000303868  -0.648            0.5170    
+IraeEFC           0.0000009290   0.0000008504   1.092            0.2747    
+EA                0.0823566368   0.1586320829   0.519            0.6036    
+A                -0.4866417503   0.2335602650  -2.084            0.0372 *  
+AS               -0.3808889556   0.2261663977  -1.684            0.0922 .  
+B                -0.1639246317   0.2441266324  -0.671            0.5019    
+C                -0.7696605708   0.5861737041  -1.313            0.1892    
+CI                0.0718676543   0.3220119692   0.223            0.8234    
+GC               -0.5684901831   0.3419385538  -1.663            0.0964 .  
+NH               -0.4551765161   0.2719998912  -1.673            0.0942 .  
+PH               -0.0971601913   1.0549766616  -0.092            0.9266    
+R                 0.2860415246   0.4562041476   0.627            0.5307    
+T                11.6338711847 336.5879598896   0.035            0.9724    
+---
+Signif. codes:  0 â€˜***â€™ 0.001 â€˜**â€™ 0.01 â€˜*â€™ 0.05 â€˜.â€™ 0.1 â€˜ â€™ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 1856.0  on 3170  degrees of freedom
+Residual deviance: 1490.5  on 3153  degrees of freedom
+AIC: 1526.5
+
+Number of Fisher Scoring iterations: 12
+"
+"0","```r
+anova(fit, test = \"Chi\")
+```"
+"1","Analysis of Deviance Table
+
+Model: binomial, link: logit
+
+Response: EnrolledOrGradDrexel.1
+
+Terms added sequentially (first to last)
+
+
+                Df Deviance Resid. Df Resid. Dev              Pr(>Chi)    
+NULL                             3170     1856.0                          
+SATAnalysis1600  1   25.851      3169     1830.2        0.000000368860 ***
+GPATerm          1  290.996      3168     1539.2 < 0.00000000000000022 ***
+CreditPerc       1   34.423      3167     1504.8        0.000000004435 ***
+HighSchoolGPA    1    0.875      3166     1503.9               0.34968    
+TotalBudget      1    0.800      3165     1503.1               0.37104    
+IraeEFC          1    1.319      3164     1501.8               0.25079    
+EA               1    0.121      3163     1501.7               0.72763    
+A                1    2.058      3162     1499.6               0.15143    
+AS               1    1.529      3161     1498.1               0.21620    
+B                1    0.001      3160     1498.1               0.97720    
+C                1    0.995      3159     1497.1               0.31848    
+CI               1    0.431      3158     1496.6               0.51137    
+GC               1    1.809      3157     1494.8               0.17859    
+NH               1    3.253      3156     1491.6               0.07128 .  
+PH               1    0.016      3155     1491.6               0.90014    
+R                1    0.412      3154     1491.2               0.52116    
+T                1    0.630      3153     1490.5               0.42726    
+---
+Signif. codes:  0 â€˜***â€™ 0.001 â€˜**â€™ 0.01 â€˜*â€™ 0.05 â€˜.â€™ 0.1 â€˜ â€™ 1
+"
+"0","```r
+pR2(fit)
+```"
+"1","         llh      llhNull           G2     McFadden         r2ML         r2CU 
+-745.2582375 -928.0176978  365.5189206    0.1969353    0.1088739    0.2457262 
+"

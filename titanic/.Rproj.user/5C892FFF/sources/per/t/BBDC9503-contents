@@ -1,0 +1,300 @@
+---
+title: "Retention predicion based on student GPA"
+output: html_notebook
+---
+
+
+```{r LoadingData}
+require(RODBC)
+source("Confusion.R")
+dbhandle <- odbcDriverConnect('Driver={SQL Server Native Client 11.0};Server=agstrat.drexel.edu,50009;Database=irae_prod;trusted_connection=yes;')
+df <- sqlQuery(dbhandle, " 
+SELECT *
+FROM irae.Retention AS r
+INNER JOIN irae.adm AS a ON a.PIDM = r.PIDM AND r.EnteringTerm = a.TERM AND a.LevelCode = r.EnteringLevelCode
+LEFT JOIN Irae_Prod.irae.FinAid AS fin ON fin.PIDM = r.PIDM AND fin.AcYr = r.EnteringAcYr   
+    LEFT JOIN
+    (
+        SELECT fst.PersonalIdentifier,
+               LEFT(fst.StudentTermCode, 5) AS term5a,
+               fst.GPATerm,
+               fst.CreditsEarnedTerm,
+               fst.CreditsAttemptedTerm,
+               1.0 * CreditsEarnedTerm / CreditsAttemptedTerm AS CreditPerc
+        FROM IBNSA.Final.FactStudentTerm AS fst
+        WHERE fst.VersionKey = 1
+              AND fst.StudentTermCode >= 201215 --in ('201735','201635','201535','201435','201335','201235')
+              AND fst.CreditsAttemptedTerm > 0
+    ) AS gpa
+        ON r.PIDM = gpa.PersonalIdentifier
+           AND gpa.term5a = r.Term5
+    LEFT JOIN
+    (
+        SELECT PIDM,
+               EnrolledInDrexel,
+               EnrolledOrGradDrexel,
+               EnteringTerm
+        FROM irae.retention
+        WHERE seq = 5
+              AND UGFTFT_EnteringCohort = 1
+    ) AS fallRet
+        ON fallRet.PIDM = r.PIDM
+           AND fallRet.EnteringTerm = r.EnteringTerm
+WHERE r.UGFTFT_EnteringCohort = 1
+      AND r.EnteringAcYr IN ( '20162017', '20172018', '20152016', '20142015', '20132014', '20122013','20182019' )
+      AND r.Seq IN ( 2);
+               
+               " )
+close(dbhandle)
+
+
+```
+
+
+```{r}
+
+require(tidyverse)
+
+train <- as.tibble(df)%>%
+  filter(EnrolledOrGradDrexel != 0)%>%
+  select(PIDM,
+         EnteringCollege,
+         EnrolledOrGradDrexel.1,
+         AdmitType,
+         HighSchoolGPA,
+         SATAnalysis1600,
+         EnteringAcYr,
+         GPATerm,
+         CreditPerc,
+         IraeEFC,
+         TotalBudget)%>%
+  filter(EnteringAcYr %in% c('2016201','20172018'))%>%
+  unique()%>%
+  unnest(EnteringCollege)%>%mutate(new=1)%>%spread(EnteringCollege,new,fill=0)%>%
+  unnest(AdmitType)%>%mutate(new=1)%>%spread(AdmitType,new,fill=0)
+
+train$HighSchoolGPA[is.na(train$HighSchoolGPA)] <- 3.572
+train$SATAnalysis1600[is.na(train$SATAnalysis1600)] <- 1285
+train$GPATerm[is.na(train$GPATerm)] <- 0
+train$CreditPerc[is.na(train$CreditPerc)] <- 0
+train$IraeEFC[is.na(train$IraeEFC)] <- 20064 
+train$TotalBudget[is.na(train$TotalBudget)] <- 70017
+```
+
+
+```{r}
+
+require(pscl)
+options(scipen = 999)
+
+fit <- glm(EnrolledOrGradDrexel.1 ~ 
+             SATAnalysis1600 + 
+             GPATerm +  
+            CreditPerc +
+             HighSchoolGPA +
+             TotalBudget + IraeEFC+
+             EA+
+             A + 
+             AS + 
+             B + 
+             C + 
+             CI + 
+             GC + 
+             NH + 
+             PH+
+             R  +
+             #SM +
+             T,
+                              family = binomial(link = 'logit'),
+                              data = train)
+
+print(fit)
+summary(fit)
+anova(fit, test = "Chi")
+pR2(fit)
+
+
+
+
+
+```
+
+
+```{r}
+
+test <- as.tibble(df)%>%
+  filter(EnrolledOrGradDrexel != 0)%>%
+    select(PIDM,
+         EnteringCollege,
+         EnrolledOrGradDrexel.1,
+         AdmitType,
+         HighSchoolGPA,
+         SATAnalysis1600,
+         EnteringAcYr,
+         GPATerm,
+         CreditPerc,
+         IraeEFC,
+         TotalBudget)%>%
+  filter(EnteringAcYr %in% c('20182019'))%>%
+  unique()%>%
+  unnest(EnteringCollege)%>%mutate(new=1)%>%spread(EnteringCollege,new,fill=0)%>%
+  unnest(AdmitType)%>%mutate(new=1)%>%spread(AdmitType,new,fill=0)
+
+
+test$HighSchoolGPA[is.na(test$HighSchoolGPA)] <- 3.572
+test$SATAnalysis1600[is.na(test$SATAnalysis1600)] <- 1285
+test$GPATerm[is.na(test$GPATerm)] <- 0
+test$CreditPerc[is.na(test$CreditPerc)] <- 0
+test$IraeEFC[is.na(test$IraeEFC)] <- 20064 
+test$TotalBudget[is.na(test$TotalBudget)] <- 70017
+```
+
+
+```{r Accuracy of logisitic model}
+
+require(caret)
+
+pred = predict(fit, newdata=test,type = "response")
+test$pred <- pred
+test$pred2 = ifelse(pred > 0.80,1,0)
+draw_confusion_matrix(confusionMatrix(factor(test$pred2),factor(test$EnrolledOrGradDrexel.1)))
+
+```
+
+
+```{r}
+mean(pred)
+```
+
+```{r}
+listd = ()
+for (i in 1:10){
+  print(i)
+}
+
+```
+
+
+
+```{r message=FALSE, paged.print=FALSE}
+
+pred_list <- NULL
+
+for (i in 1:1000){
+  trainIndex <- sample(1:1500, replace = TRUE)
+  trainTemp <- train[trainIndex, ]
+  fit <- glm(EnrolledOrGradDrexel.1 ~ 
+             SATAnalysis1600 + 
+             GPATerm +  
+            CreditPerc +
+             HighSchoolGPA +
+             TotalBudget + IraeEFC+
+             EA+
+             A + 
+             AS + 
+             B + 
+             C + 
+             CI + 
+             GC + 
+             NH + 
+             PH+
+             R  +
+             #SM +
+             T,
+                              family = binomial(link = 'logit'),
+                              data = trainTemp)  
+  pred = predict(fit, newdata=test,type = "response")
+  pred_list[i] = mean(pred)
+
+}
+
+hist(pred_list)
+
+```
+
+
+
+
+
+```{r}
+missing <- as.tibble(df)%>%
+  filter(EnrolledOrGradDrexel == 0)%>%filter(EnteringAcYr %in% c('20172018'))
+```
+
+
+
+
+```{r}
+test%>%mutate(gpabin = case_when(GPATerm <2 ~ 'less than 2',
+                                    GPATerm <= 2.5 ~ '2.0 to 2.5',
+                                    GPATerm <= 3.0 ~ '2.5-3.0',
+                                    GPATerm <= 3.5 ~ '3.0-3.5',
+                                    GPATerm > 3.5 ~ '3.5 and above',TRUE ~ 'Missing'))%>%
+  group_by(gpabin)%>%summarise(ret = mean(pred))
+```
+
+
+```{r}
+
+require(rpart)
+require(tree)
+require(party)
+require(tidyverse)
+dtrain <- as.tibble(df)%>%
+  filter(EnrolledOrGradDrexel != 0)%>%
+    select(PIDM,
+         EnteringCollege,
+         EnrolledOrGradDrexel.1,
+         AdmitType,
+         HighSchoolGPA,
+         SATAnalysis1600,
+         EnteringAcYr,
+         GPATerm,
+         CreditPerc,
+         IraeEFC,
+         TotalBudget)%>%
+  filter(EnteringAcYr %in% c('20162017','20172018'))%>%
+  unique()
+
+dtree <- ctree(factor(EnrolledOrGradDrexel.1) ~ 
+             SATAnalysis1600 + 
+             GPATerm +  
+            CreditPerc +
+             HighSchoolGPA +
+             TotalBudget + IraeEFC+
+            AdmitType + EnteringCollege, 
+            data=dtrain)
+
+
+plot(dtree, main="Conditional Inference Tree")
+
+
+```
+
+```{r}
+require(caret)
+dtest <- as.tibble(df)%>%
+  filter(EnrolledOrGradDrexel != 0)%>%
+    select(PIDM,
+         EnteringCollege,
+         EnrolledOrGradDrexel.1,
+         AdmitType,
+         HighSchoolGPA,
+         SATAnalysis1600,
+         EnteringAcYr,
+         GPATerm,
+         CreditPerc,
+         IraeEFC,
+         TotalBudget)%>%
+  filter(EnteringAcYr %in% c('20172018'))%>%
+  unique()
+
+pred <- predict(dtree,dtest,type = "response")
+#pred <- unnest(pred)
+dtest$pred <- pred
+draw_confusion_matrix(confusionMatrix(dtest$pred,factor(dtest$EnrolledOrGradDrexel.1)))
+
+
+```
+
+

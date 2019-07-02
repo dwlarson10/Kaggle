@@ -1,0 +1,70 @@
+"0","```r
+```r
+require(rpart)
+```
+```"
+"1","Loading required package: rpart
+"
+"0","```r
+```r
+require(tree)
+```
+```"
+"1","Loading required package: tree
+"
+"0","```r
+```r
+require(party)
+```
+```"
+"1","Loading required package: party
+Loading required package: grid
+Loading required package: mvtnorm
+Loading required package: modeltools
+Loading required package: stats4
+Loading required package: strucchange
+Loading required package: zoo
+
+Attaching package: Ã£Â¤Â¼Ã£Â¸Â±zooÃ£Â¤Â¼Ã£Â¸Â²
+
+The following objects are masked from Ã£Â¤Â¼Ã£Â¸Â±package:baseÃ£Â¤Â¼Ã£Â¸Â²:
+
+    as.Date, as.Date.numeric
+
+Loading required package: sandwich
+
+Attaching package: Ã£Â¤Â¼Ã£Â¸Â±strucchangeÃ£Â¤Â¼Ã£Â¸Â²
+
+The following object is masked from Ã£Â¤Â¼Ã£Â¸Â±package:stringrÃ£Â¤Â¼Ã£Â¸Â²:
+
+    boundary
+"
+"0","```r
+```r
+require(tidyverse)
+dtrain <- as.tibble(df)%>%
+  filter(EnrolledOrGradDrexel != 0)%>%
+    select(PIDM,
+         EnteringCollege,
+         EnrolledOrGradDrexel.1,
+         AdmitType,
+         HighSchoolGPA,
+         SATAnalysis1600,
+         EnteringAcYr,
+         GPATerm,
+         CreditPerc,
+         IraeEFC,
+         TotalBudget)%>%
+  filter(EnteringAcYr %in% c('20152016','20162017'))%>%
+  unique()
+dtree <- ctree(factor(EnrolledOrGradDrexel.1) ~ 
+             SATAnalysis1600 + 
+             GPATerm +  
+            CreditPerc +
+             HighSchoolGPA +
+             TotalBudget + IraeEFC+
+            AdmitType + EnteringCollege, 
+            data=dtrain)
+plot(dtree, main=\Conditional Inference Tree\)
+```
+```"

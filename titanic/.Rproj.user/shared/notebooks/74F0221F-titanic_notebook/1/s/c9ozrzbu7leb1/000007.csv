@@ -1,0 +1,1 @@
+"0","train%>%group_by(Pclass)%>%summarise(count= n())%>%ggplot(aes(x=Pclass,y=count))+geom_bar(stat = 'identity')"

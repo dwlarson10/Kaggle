@@ -1,0 +1,27 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1560516607256.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1375836561",
+    "id" : "B2531BD0",
+    "lastKnownWriteTime" : 1560344952,
+    "last_content_update" : 1560344952,
+    "path" : "C:/Users/dwl37/OneDrive - drexel.edu/Personal/MoviePredictions/draft.Rmd",
+    "project_path" : "draft.Rmd",
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "cursorPosition" : "99,17",
+        "scrollLine" : "94",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

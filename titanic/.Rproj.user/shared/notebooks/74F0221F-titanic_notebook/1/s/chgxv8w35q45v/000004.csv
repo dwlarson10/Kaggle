@@ -1,0 +1,2 @@
+"0","train%>%mutate(child = case_when(Age <= 10 ~ 1,"
+"0","                                 T ~ 0))%>% group_by(child)%>%summarise(Surv_rate = mean(Survived))%>%ggplot(aes(x=child,y=Surv_rate))+geom_bar(stat = 'identity')"

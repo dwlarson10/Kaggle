@@ -1,0 +1,25 @@
+"0","```r
+```r
+require(caret)
+```
+```"
+"1","Loading required package: caret
+Loading required package: lattice
+
+Attaching package: Ã£Â¤Â¼Ã£Â¸Â±caretÃ£Â¤Â¼Ã£Â¸Â²
+
+The following object is masked from Ã£Â¤Â¼Ã£Â¸Â±package:purrrÃ£Â¤Â¼Ã£Â¸Â²:
+
+    lift
+"
+"0","```r
+```r
+pred = predict(fit, newdata=test,type = \response\)
+test$pred <- pred
+test$pred2 = ifelse(pred > 0.80,1,0)
+draw_confusion_matrix(confusionMatrix(factor(test$pred2),factor(dtest$EnrolledOrGradDrexel.1)))
+```
+```"
+"1","Error in draw_confusion_matrix(confusionMatrix(factor(test$pred2), factor(dtest$EnrolledOrGradDrexel.1))) : 
+  could not find function \draw_confusion_matrix\
+"

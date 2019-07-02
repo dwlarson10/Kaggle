@@ -1,0 +1,221 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+library(readr)
+train <- read_csv("titanic/train.csv")
+```
+
+
+```{r}
+draw_confusion_matrix <- function(cm) {
+  
+  layout(matrix(c(1,1,2)))
+  par(mar=c(2,2,2,2))
+  plot(c(100, 345), c(300, 450), type = "n", xlab="", ylab="", xaxt='n', yaxt='n')
+  title('CONFUSION MATRIX', cex.main=2)
+  
+  # create the matrix 
+  rect(150, 430, 240, 370, col='#3F97D0')
+  text(195, 435, 'Class1', cex=1.2)
+  rect(250, 430, 340, 370, col='#F7AD50')
+  text(295, 435, 'Class2', cex=1.2)
+  text(125, 370, 'Predicted', cex=1.3, srt=90, font=2)
+  text(245, 450, 'Actual', cex=1.3, font=2)
+  rect(150, 305, 240, 365, col='#F7AD50')
+  rect(250, 305, 340, 365, col='#3F97D0')
+  text(140, 400, 'Class1', cex=1.2, srt=90)
+  text(140, 335, 'Class2', cex=1.2, srt=90)
+  
+  # add in the cm results 
+  res <- as.numeric(cm$table)
+  text(195, 400, res[1], cex=1.6, font=2, col='white')
+  text(195, 335, res[2], cex=1.6, font=2, col='white')
+  text(295, 400, res[3], cex=1.6, font=2, col='white')
+  text(295, 335, res[4], cex=1.6, font=2, col='white')
+  
+  # add in the specifics 
+  plot(c(100, 0), c(100, 0), type = "n", xlab="", ylab="", main = "DETAILS", xaxt='n', yaxt='n')
+  text(10, 85, names(cm$byClass[1]), cex=1.2, font=2)
+  text(10, 70, round(as.numeric(cm$byClass[1]), 3), cex=1.2)
+  text(30, 85, names(cm$byClass[2]), cex=1.2, font=2)
+  text(30, 70, round(as.numeric(cm$byClass[2]), 3), cex=1.2)
+  text(50, 85, names(cm$byClass[5]), cex=1.2, font=2)
+  text(50, 70, round(as.numeric(cm$byClass[5]), 3), cex=1.2)
+  text(70, 85, names(cm$byClass[6]), cex=1.2, font=2)
+  text(70, 70, round(as.numeric(cm$byClass[6]), 3), cex=1.2)
+  text(90, 85, names(cm$byClass[7]), cex=1.2, font=2)
+  text(90, 70, round(as.numeric(cm$byClass[7]), 3), cex=1.2)
+  
+  # add in the accuracy information 
+  text(30, 35, names(cm$overall[1]), cex=1.5, font=2)
+  text(30, 20, round(as.numeric(cm$overall[1]), 3), cex=1.4)
+  text(70, 35, names(cm$overall[2]), cex=1.5, font=2)
+  text(70, 20, round(as.numeric(cm$overall[2]), 3), cex=1.4)
+}
+```
+
+
+
+## Exploratory analysis
+
+```{r}
+
+summary(train)
+
+train$age[is.na(train$age)] <- mean(train$Age,na.rm = T
+                )
+
+
+```
+
+
+
+
+
+## intial model
+
+```{r}
+require(tidyverse)
+#source("C:Users/dwl37/OneDrive - drexel.edu/R Analysis/Confusion.R")
+
+train <- train%>%mutate(female = case_when(Sex=='female' ~ 1,
+                                  T ~ 0))
+
+formula <- Survived ~ Pclass + female + Fare
+
+fit <- glm(formula,data=train,family = binomial(link = 'logit'))
+
+summary(fit)
+
+test <- read_csv("titanic/test.csv")
+
+test <- test%>%mutate(female = case_when(Sex=='female' ~ 1,
+                                  T ~ 0))
+
+test$Fare[is.na(test$Fare)] <- mean(train$Fare,na.rm = T
+                )
+
+                 
+require(caret)
+
+
+
+pred = predict(fit, newdata=test,type = "response")                 
+test$Survived = ifelse(pred > 0.60,1,0)
+#draw_confusion_matrix(confusionMatrix(factor(test$pred2),factor(test$survived)))
+
+print_test <- test%>%select('PassengerId','Survived')
+
+write_csv(print_test,'upload.csv')
+
+
+
+
+```
+
+
+## Exploratory Data Analysis
+
+
+### How many people at each class level
+```{r}
+
+train%>%group_by(Pclass)%>%summarise(count= n())%>%ggplot(aes(x=Pclass,y=count))+geom_bar(stat = 'identity')
+
+
+```
+
+survival rate by class
+```{r}
+
+train%>%group_by(Pclass)%>%summarise(Surv_rate = mean(Survived))%>%ggplot(aes(x=Pclass,y=Surv_rate))+geom_bar(stat = 'identity')
+
+
+```
+
+distributions of sibs and parants
+
+```{r}
+
+
+train%>%group_by(SibSp)%>%summarise(Surv_rate = mean(Survived))%>%ggplot(aes(x=SibSp,y=Surv_rate))+geom_bar(stat = 'identity')
+
+
+```
+
+
+
+```{r}
+train%>%group_by(Parch)%>%summarise(Surv_rate = mean(Survived))%>%ggplot(aes(x=Parch,y=Surv_rate))+geom_bar(stat = 'identity')
+```
+
+
+```{r}
+train%>%mutate(left_Cabin = substr(Cabin,1,1))%>%group_by(left_Cabin)%>%summarise(Surv_rate = mean(Survived))%>%ggplot(aes(x=left_Cabin,y=Surv_rate))+geom_bar(stat = 'identity')
+```
+
+```{r}
+train%>%mutate(child = case_when(Age <= 10 ~ 1,
+                                 T ~ 0))%>% group_by(child)%>%summarise(Surv_rate = mean(Survived))%>%ggplot(aes(x=child,y=Surv_rate))+geom_bar(stat = 'identity')
+```
+
+
+```{r}
+require(pscl)
+options(scipen = 999)
+
+train <- train%>%mutate(female = case_when(Sex=='female' ~ 1,
+                                  T ~ 0),
+                        child = case_when(Age <= 10 ~ 1,
+                                 T ~ 0),
+                        )
+
+formula <- Survived ~ Pclass + female + child
+
+fit <- glm(formula,data=train,family = binomial(link = 'logit'))
+
+summary(fit)
+pR2(fit)
+
+test <- read_csv("titanic/test.csv")
+
+test <- test%>%mutate(female = case_when(Sex=='female' ~ 1,
+                                  T ~ 0),
+                        child = case_when(Age <= 10 ~ 1,
+                                 T ~ 0)
+                        )
+
+test$Fare[is.na(test$Fare)] <- mean(train$Fare,na.rm = T
+                )
+
+                 
+require(caret)
+
+
+
+pred = predict(fit, newdata=test,type = "response")                 
+test$Survived = ifelse(pred > 0.60,1,0)
+#draw_confusion_matrix(confusionMatrix(factor(test$pred2),factor(test$survived)))
+
+print_test <- test%>%select('PassengerId','Survived')
+
+write_csv(print_test,'upload.csv')
+
+
+
+```
+
+
+## Considering XGboost and Random Forest
+
+```{r}
+
+```
+
+
+

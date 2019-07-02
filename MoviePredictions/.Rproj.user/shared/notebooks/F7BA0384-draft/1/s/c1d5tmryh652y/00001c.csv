@@ -1,0 +1,5 @@
+"0",""
+"0","df%>%#filter(collectionTF == 'Collection')%>%"
+"0","  group_by(collectionTF)%>%summarise(gross = mean(revenue),count=n())%>%"
+"0","  ggplot(aes(x=collectionTF,y=gross,fill=count))+"
+"0","  geom_bar(stat='Identity')"

@@ -1,0 +1,24 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1556728306869.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "14|39|58|0|\n",
+    "hash" : "997842559",
+    "id" : "DA12DA4B",
+    "lastKnownWriteTime" : 1556747958,
+    "last_content_update" : 1556747959171,
+    "path" : "C:/Users/dwl37/OneDrive - drexel.edu/Personal/titanic/titanic_notebook.Rmd",
+    "project_path" : "titanic_notebook.Rmd",
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "cursorPosition" : "216,0",
+        "scrollLine" : "211",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

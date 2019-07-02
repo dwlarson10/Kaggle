@@ -1,0 +1,25 @@
+"0","```r
+test <- as.tibble(df)%>%
+  filter(EnrolledOrGradDrexel != 0)%>%
+    select(PIDM,
+         EnteringCollege,
+         EnrolledOrGradDrexel.1,
+         AdmitType,
+         HighSchoolGPA,
+         SATAnalysis1600,
+         EnteringAcYr,
+         GPATerm,
+         CreditPerc,
+         IraeEFC,
+         TotalBudget)%>%
+  filter(EnteringAcYr %in% c('20182019'))%>%
+  unique()%>%
+  unnest(EnteringCollege)%>%mutate(new=1)%>%spread(EnteringCollege,new,fill=0)%>%
+  unnest(AdmitType)%>%mutate(new=1)%>%spread(AdmitType,new,fill=0)
+test$HighSchoolGPA[is.na(test$HighSchoolGPA)] <- 3.572
+test$SATAnalysis1600[is.na(test$SATAnalysis1600)] <- 1285
+test$GPATerm[is.na(test$GPATerm)] <- 0
+test$CreditPerc[is.na(test$CreditPerc)] <- 0
+test$IraeEFC[is.na(test$IraeEFC)] <- 20064 
+test$TotalBudget[is.na(test$TotalBudget)] <- 70017
+```"

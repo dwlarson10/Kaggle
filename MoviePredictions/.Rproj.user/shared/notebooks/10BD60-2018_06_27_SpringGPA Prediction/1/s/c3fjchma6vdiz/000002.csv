@@ -1,0 +1,25 @@
+"0","```r
+require(caret)
+dtest <- as.tibble(df)%>%
+  filter(EnrolledOrGradDrexel != 0)%>%
+    select(PIDM,
+         EnteringCollege,
+         EnrolledOrGradDrexel.1,
+         AdmitType,
+         HighSchoolGPA,
+         SATAnalysis1600,
+         EnteringAcYr,
+         GPATerm,
+         CreditPerc,
+         IraeEFC,
+         TotalBudget)%>%
+  filter(EnteringAcYr %in% c('20172018'))%>%
+  unique()
+
+pred <- predict(dtree,dtest,type = \"response\")
+#pred <- unnest(pred)
+dtest$pred <- pred
+draw_confusion_matrix(confusionMatrix(dtest$pred,factor(dtest$EnrolledOrGradDrexel.1)))
+
+
+```"

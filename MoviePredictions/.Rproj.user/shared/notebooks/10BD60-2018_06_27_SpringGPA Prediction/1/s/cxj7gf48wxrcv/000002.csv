@@ -1,0 +1,12 @@
+"0","```r
+```r
+```r
+test%>%mutate(gpabin = case_when(GPATerm <2 ~ 'less than 2',
+                                    GPATerm <= 2.5 ~ '2.0 to 2.5',
+                                    GPATerm <= 3.0 ~ '2.5-3.0',
+                                    GPATerm <= 3.5 ~ '3.0-3.5',
+                                    GPATerm > 3.5 ~ '3.5 and above',TRUE ~ 'Missing'))%>%
+  group_by(gpabin)%>%summarise(ret = mean(pred))
+```
+```
+```"

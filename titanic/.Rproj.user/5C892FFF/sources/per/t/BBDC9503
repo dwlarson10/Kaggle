@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1556728696537.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "972723925",
+    "id" : "BBDC9503",
+    "lastKnownWriteTime" : 1556742675,
+    "last_content_update" : 1556747683594,
+    "path" : "C:/Users/dwl37/OneDrive - drexel.edu/R Analysis/2018_06_27_SpringGPA Prediction.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "cursorPosition" : "113,0",
+        "scrollLine" : "81"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
