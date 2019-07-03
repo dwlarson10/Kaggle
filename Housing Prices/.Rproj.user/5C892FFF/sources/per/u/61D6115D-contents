@@ -1,0 +1,47 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r message=FALSE, warning=FALSE}
+require(tidyverse)
+df_train <- read_csv("house-prices-advanced-regression-techniques/train.csv")
+
+df_test <- read_csv("house-prices-advanced-regression-techniques/test.csv")
+
+df <- bind_rows(df_train,df_test)
+
+glimpse(df)
+
+
+```
+
+
+
+```{r}
+summary(df)
+```
+
+
+```{r}
+require(VIM)
+aggr(df, sortVars = TRUE, prop = FALSE, cex.axis = .35, 
+     numbers = TRUE, col = c('grey99','red'))
+```
+
+
+```{r}
+
+
+
+
+```
+
+
+
+
+
+
+

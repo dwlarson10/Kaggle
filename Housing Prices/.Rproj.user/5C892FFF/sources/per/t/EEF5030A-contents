@@ -47,8 +47,6 @@ Columns to work with
 require(stringi)
 require(lubridate)
 
-df$release_date[3829] <- '3/20/01'
-
 genre_matching = "Comedy|Horror|Attion|DramaDoocumentary|Science Fiction|Crime|Fantasy|Thriller|Animation|Adventure|Mystery|War|Romance|Music|Family|Western|History|TV Movie|Foreign"
 df <- df%>%mutate(revenue = as.numeric(revenue),mainGenre = str_extract(genres,genre_matching),
                   PartOfCollection=stri_extract(belongs_to_collection, regex = "(?<=name\\'\\:\\s\\').+(?=\\'\\,\\s\\'poster)"),
@@ -72,29 +70,10 @@ df <- df%>%mutate(revenue = as.numeric(revenue),mainGenre = str_extract(genres,g
                   release_year = year(release_date2),
                   release_month = month(release_date2)
                   )
-  
-
-
-df$runtime[is.na(df$runtime)] <- mean(df$runtime, na.rm = TRUE)
-df$castSize[is.na(df$castSize)] <- mean(df$castSize, na.rm = TRUE)
-df$crewSize[is.na(df$crewSize)] <- mean(df$crewSize, na.rm = TRUE)
-df$castFemale[is.na(df$castFemale)] <- mean(df$castFemale, na.rm = TRUE)
-df$castMale[is.na(df$castMale)] <- mean(df$castMale, na.rm = TRUE)
-df$crewFemale[is.na(df$crewFemale)] <- mean(df$crewFemale, na.rm = TRUE)
-df$crewMale[is.na(df$crewMale)] <- mean(df$crewMale, na.rm = TRUE)
-df$mainGenre[is.na(df$mainGenre)] <- "Drama"
-df$countGenres[is.na(df$countGenres)] <- 1
-df$prodCompCount[is.na(df$prodCompCount)] <- 1
-df$prodCountriesCount[is.na(df$prodCountriesCount)] <- 1
-df$languagesSpoken[is.na(df$languagesSpoken)] <- 1
-
-
-
 
 
 dftest = df%>%filter(set=='test')%>%
-  select('id',
-         'budget',
+  select('revenue','budget',
          'popularity',
          'runtime',
          #'mainGenre',
@@ -102,10 +81,7 @@ dftest = df%>%filter(set=='test')%>%
          'castSize',
          'castFemale',
          'castMale',
-         #'percentFemale',
-         'crewSize',
-         'crewFemale',
-         'crewMale',
+         'percentFemale',
          'countGenres',
          'prodCompCount',
          'prodCountriesCount',
@@ -121,39 +97,22 @@ dfTrain = df%>%filter(set=='Train')%>%
          'castSize',
          'castFemale',
          'castMale',
-        'crewSize',
-         'crewFemale',
-         'crewMale',
-         #'percentFemale',
+         'percentFemale',
          'countGenres',
          'prodCompCount',
          'prodCountriesCount',
          'languagesSpoken',
          'release_year',
-         'release_month')#%>%filter(complete.cases(.))
+         'release_month')%>%filter(complete.cases(.))
 
 
 summary(dfTrain)
 
 ```
 
-
-
-
-
 ## Exploratory Analysis
 
 
-
-
-
-## Missing Data
-
-```{r}
-require(VIM)
-aggr(dfTrain, sortVars = TRUE, prop = FALSE, cex.axis = .35, 
-     numbers = TRUE, col = c('grey99','red'))
-```
 
 
 
@@ -206,16 +165,6 @@ ggplotly(ggplot(varImportance, aes(x = reorder(Variables, Importance),
 
 
 
-```{r}
-
-prediction <- predict(rf, dftest)
-solution <- data.frame(id = dftest$id, revenue = prediction)
-#solution <- as_tibble(solution) %>%
- #  mutate(revenue = 10^revenue)
-
-write.csv(solution, file = 'Box_office_prediction.csv', row.names = F)
-
-```
 
 
 

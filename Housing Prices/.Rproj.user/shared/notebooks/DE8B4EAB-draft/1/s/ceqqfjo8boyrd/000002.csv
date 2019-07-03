@@ -1,0 +1,6 @@
+"0","```r
+test = df%>%select(set=='test')
+
+```"
+"1","Error in .f(.x[[i]], ...) : object 'set' not found
+"

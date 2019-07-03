@@ -1,0 +1,45 @@
+"0","require(VIM)"
+"2","Loading required package: VIM
+"
+"2","package ‘VIM’ was built under R version 3.5.3"
+"2","Loading required package: colorspace
+"
+"2","package ‘colorspace’ was built under R version 3.5.2"
+"2","Loading required package: grid
+"
+"2","Loading required package: data.table
+"
+"2","data.table 1.11.8  Latest news: r-datatable.com
+"
+"2","
+Attaching package: ‘data.table’
+
+"
+"2","The following objects are masked from ‘package:dplyr’:
+
+    between, first, last
+
+"
+"2","The following object is masked from ‘package:purrr’:
+
+    transpose
+
+"
+"2","VIM is ready to use. 
+ Since version 4.0.0 the GUI is in its own package VIMGUI.
+
+          Please use the package to use the new (and old) GUI.
+
+"
+"2","Suggestions and bug-reports can be submitted at: https://github.com/alexkowa/VIM/issues
+"
+"2","
+Attaching package: ‘VIM’
+
+"
+"0","aggr(df, sortVars = TRUE, prop = FALSE, cex.axis = .35, "
+"0","     numbers = TRUE, col = c('grey99','red'))"
+"2","not enough vertical space to display frequencies (too many combinations)"
+"1","
+ Variables sorted by number of missings: 
+"

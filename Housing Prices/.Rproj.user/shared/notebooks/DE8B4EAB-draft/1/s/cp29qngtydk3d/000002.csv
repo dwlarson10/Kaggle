@@ -1,0 +1,10 @@
+"0","```r
+
+
+
+fit <- glm(revenue~budget+castSize+release_year,data=df)
+  
+summary(fit)  
+plot(fit)
+
+```"
